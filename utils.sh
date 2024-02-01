@@ -29,18 +29,18 @@ fail() {
 }
 
 ###
-# Ask Y/n
+# Confirm Y/n
 #
 # @params $1 The prompt message.
 # @returns {Boolean}
 #
 # @example
-#  if ask "already exists, overwrite?"; then
+#  if confirm "already exists, overwrite?"; then
 #    echo "something"
 #  fi
 #
 ###
-ask() {
+confirm() {
 	read -p "$1 (Y/n): " resp
 	if [ -z "$resp" ]; then
 		response_lc="y" # empty is Yes
