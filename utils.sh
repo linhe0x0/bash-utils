@@ -31,7 +31,7 @@ fail() {
 ###
 # Confirm Y/n
 #
-# @params $1 The prompt message.
+# @param $1 The prompt message.
 # @returns {Boolean}
 #
 # @example
@@ -42,6 +42,7 @@ fail() {
 ###
 confirm() {
 	read -p "$1 (Y/n): " resp
+
 	if [ -z "$resp" ]; then
 		response_lc="y" # empty is Yes
 	else
@@ -49,4 +50,32 @@ confirm() {
 	fi
 
 	[ "$response_lc" = "y" ]
+}
+
+###
+# Expand
+#
+# @param $1 The prompt message
+# @param $... Options, e.g. [s]kip [o]verwrite
+# @returns {String} $expand_result User input result.
+#
+###
+expand() {
+	local args els desc
+
+	args=("$@")
+	els=${#args[@]}
+	desc=""
+
+	for ((i = 1; i < $els; i++)); do
+		if [[ i -eq 1 ]]; then
+			desc+="${args[${i}]}"
+		else
+			desc+=", ${args[${i}]}"
+		fi
+	done
+
+	info "$1\n$desc?"
+
+	read -n 1 expand_result </dev/tty
 }
