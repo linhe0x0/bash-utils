@@ -2,30 +2,30 @@
 # Print an info-level message.
 ###
 info() {
-	printf "\r[ \033[00;34m..\033[0m ] $1\n"
+  printf "\r[ \033[00;34m..\033[0m ] $1\n"
 }
 
 ###
 # Print a warning-level message.
 ###
 warn() {
-	printf "\r[ \033[0;33m??\033[0m ] $1\n"
+  printf "\r[ \033[0;33m??\033[0m ] $1\n"
 }
 
 ###
 # Print a success-level message.
 ###
 success() {
-	printf "\r\033[2K[ \033[00;32mOK\033[0m ] $1\n"
+  printf "\r\033[2K[ \033[00;32mOK\033[0m ] $1\n"
 }
 
 ###
 # Print a fail-level message and exit the process by 1.
 ###
 fail() {
-	printf "\r\033[2K[\033[0;31mFAIL\033[0m] $1\n"
-	echo ''
-	exit 1
+  printf "\r\033[2K[\033[0;31mFAIL\033[0m] $1\n"
+  echo ''
+  exit 1
 }
 
 ###
@@ -41,41 +41,73 @@ fail() {
 #
 ###
 confirm() {
-	read -p "$1 (Y/n): " resp
+  read -p "$1 (Y/n): " resp
 
-	if [ -z "$resp" ]; then
-		response_lc="y" # empty is Yes
-	else
-		response_lc=$(echo "$resp" | tr '[:upper:]' '[:lower:]') # case insensitive
-	fi
+  if [ -z "$resp" ]; then
+    response_lc="y" # empty is Yes
+  else
+    response_lc=$(echo "$resp" | tr '[:upper:]' '[:lower:]') # case insensitive
+  fi
 
-	[ "$response_lc" = "y" ]
+  [ "$response_lc" = "y" ]
 }
 
 ###
-# Expand
+# Link files
 #
-# @param $1 The prompt message
-# @param $... Options, e.g. [s]kip [o]verwrite
-# @returns {String} $expand_result User input result.
-#
+# @param $1 The source file path you want to link.
+# @param $2 The destination file path you want to link to.
 ###
-expand() {
-	local args els desc
+link_file() {
+  info "Linking files: $1 => $2"
 
-	args=("$@")
-	els=${#args[@]}
-	desc=""
+  local src=$1 dst=$2
 
-	for ((i = 1; i < $els; i++)); do
-		if [[ i -eq 1 ]]; then
-			desc+="${args[${i}]}"
-		else
-			desc+=", ${args[${i}]}"
-		fi
-	done
+  local action= overwrite= backup= skip=
 
-	info "$1\n$desc?"
+  if [ -f "$dst" -o -d "$dst" -o -L "$dst" ]; then
+    local currentSrc="$(readlink $dst)"
 
-	read -n 1 expand_result </dev/tty
+    if [ "$currentSrc" == "$src" ]; then
+      skip=true
+    else
+      info "File already exists: $dst ($(basename "$src")), what do you want to do?\n\
+              [s]kip, [o]verwrite, [b]ackup?"
+      read -n 1 action </dev/tty
+
+      case "$action" in
+        o)
+          overwrite=true
+          ;;
+        b)
+          backup=true
+          ;;
+        s)
+          skip=true
+          ;;
+        *) ;;
+      esac
+    fi
+
+    if [ "$overwrite" == "true" ]; then
+      rm -rf "$dst"
+      success "removed $dst"
+    fi
+
+    if [ "$backup" == "true" ]; then
+      mv "$dst" "${dst}.bak"
+      success "moved $dst to ${dst}.bak"
+    fi
+
+    if [ "$skip" == "true" ]; then
+      success "skipped $src"
+    fi
+  fi
+
+  if [ "$skip" != "true" ]; then # "false" or empty
+    ln -s "$1" "$2"
+    success "linked $1 to $2"
+  fi
+
+  success "Files linked"
 }
