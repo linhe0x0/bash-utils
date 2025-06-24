@@ -121,3 +121,26 @@ link_file() {
 
   success "Files linked"
 }
+
+###
+# Checks if a command/program exists in system PATH
+# Usage: has <command_name>
+# Returns 0 (true) if command exists, non-zero (false) otherwise
+#
+# Examples:
+#   if has git; then
+#     echo "Git is installed"
+#   else
+#     echo "Git not found"
+#   fi
+#
+#   has docker && echo "Docker available" || echo "Docker missing"
+#
+#   if ! has sudo; then
+#     echo "Could not find the command \"sudo\""
+#     exit 1
+#   fi
+###
+has() {
+  command -v "$1" 1>/dev/null 2>&1
+}
