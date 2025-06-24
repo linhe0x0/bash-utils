@@ -1,29 +1,39 @@
+BOLD="$(tput bold 2>/dev/null || printf '')"
+GREY="$(tput setaf 0 2>/dev/null || printf '')"
+UNDERLINE="$(tput smul 2>/dev/null || printf '')"
+RED="$(tput setaf 1 2>/dev/null || printf '')"
+GREEN="$(tput setaf 2 2>/dev/null || printf '')"
+YELLOW="$(tput setaf 3 2>/dev/null || printf '')"
+BLUE="$(tput setaf 4 2>/dev/null || printf '')"
+MAGENTA="$(tput setaf 5 2>/dev/null || printf '')"
+NO_COLOR="$(tput sgr0 2>/dev/null || printf '')"
+
 ###
 # Print an info-level message.
 ###
 info() {
-  printf "\r[ \033[00;34m..\033[0m ] $1\n"
+  printf '%s\n' "${BOLD}${BLUE}>${NO_COLOR} $*"
 }
 
 ###
 # Print a warning-level message.
 ###
 warn() {
-  printf "\r[ \033[0;33m??\033[0m ] $1\n"
+  printf '%s\n' "${YELLOW}! $*${NO_COLOR}"
 }
 
 ###
 # Print a success-level message.
 ###
 success() {
-  printf "\r\033[2K[ \033[00;32mOK\033[0m ] $1\n"
+  printf '%s\n' "${GREEN}✓${NO_COLOR} $*"
 }
 
 ###
 # Print a fail-level message and exit the process by 1.
 ###
-fail() {
-  printf "\r\033[2K[\033[0;31mFAIL\033[0m] $1\n"
+error() {
+  printf '%s\n' "${RED}x $*${NO_COLOR}" >&2
   echo ''
   exit 1
 }
